@@ -1,0 +1,1 @@
+GEN_CSRCS += _bck_alpha_480x400.c _lb_alpha_61x53.c _jy_alpha_61x53.c _start_alpha_64x59.c _stop_alpha_64x59.c _phone_alpha_30x30.c
