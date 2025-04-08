@@ -15,31 +15,219 @@
 #include "lvgl.h"
 #include "custom.h"
 
-/*********************
- *      DEFINES
- *********************/
+uint8_t recv_buf[1920*1080*2];
+char r_buf[1200] = {0};
 
-/**********************
- *      TYPEDEFS
- **********************/
 
-/**********************
- *  STATIC PROTOTYPES
- **********************/
+char rec_buf[4096];  // 缓存，用于存储从网络读取的数据
+uint8_t img_buf[800*480*4]; // 图像缓冲区，用于存储解码后的图像数据
+lv_img_dsc_t dec_img = { // 定义图像描述结构体
+  .header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA, // 图像格式为带透明度的真彩色
+  .header.always_zero = 0, // 保持为零
+  .header.reserved = 0, // 保留字段
+  .header.w = 800, // 图像宽度
+  .header.h = 480, // 图像高度
+  .data_size = 384000 * LV_IMG_PX_SIZE_ALPHA_BYTE, // 图像数据的大小（800*480*4）
+  .data = img_buf, // 图像数据缓冲区
+};
 
-/**********************
- *  STATIC VARIABLES
- **********************/
+extern AVCodecContext *videocodecContext;
+extern AVPacket *video_packet; 
+extern AVFrame *video_frame;
+extern AVFrame *video_rgb_frame;
+struct SwsContext *swsContext;
 
-/**
- * Create a demo application
- */
+extern AVCodecContext *audiocodecContext;
+extern AVPacket audiopacket;
+extern AVFrame *audioframe;
+extern SDL_AudioDeviceID audioDevice;
+void *dec_video(void *arg)
+{
+    int ret;
+    int videoIndex = -1;
+    
+
+    HELMET_MSG readmsg;//接收命令与长度结构体
+    while(1)
+    {
+        // if(stop = 1)
+        // {
+        //     pthread_exit(NULL);
+        // }
+        //命令&长度
+        int n = mysock_recv(sockfd,&readmsg,sizeof(readmsg));
+
+        switch (readmsg.command)
+        {
+            case XYD_MSG_VIDEO:
+            {
+                // printf("sockfd===%d\r\n",sockfd);
+                // printf("sizeof(readmsg) == %ld\r\n",sizeof(readmsg));
+                // printf("sendvideo_音频数据加入队列成功msg.command==%d\r\n",readmsg.command);
+                // printf("sendvideo_msg.data_length==%d\r\n",readmsg.data_length);
+                // printf("sendvideo_msg.sum==%d\r\n",readmsg.sum);
+                memset(recv_buf,0,sizeof(recv_buf));
+                int ret =mysock_recv(sockfd,recv_buf,readmsg.data_length);
+                printf("视频接收完成!\r\n");
+                // printf("ret == %d\r\n",ret );
+                // printf("recv_buf【100】 == %d\r\n",recv_buf[100]);
+                // printf("senddata[99]==%d\r\n",recv_buf[99]);
+                // printf("senddata[98]==%d\r\n",recv_buf[98]);
+                // printf("senddata[97]==%d\r\n",recv_buf[97]);
+                // printf("senddata[96]==%d\r\n",recv_buf[96]);
+                av_init_packet(video_packet);
+                video_packet->size = readmsg.data_length;
+                video_packet->data = recv_buf;
+                printf("pkt->size == %d\r\n",video_packet->size);
+                //ret = av_read_frame(formatcontext,pkt);
+                //将视频数据送到解码器队列
+                // printf("senddata[100]==%d\r\n",pkt->data[100]);
+                ret = avcodec_send_packet(videocodecContext,video_packet);
+                
+                ret = avcodec_receive_frame(videocodecContext, video_frame);
+                if(-EAGAIN == ret)
+                {
+                    break;
+                }
+                printf("视频解码成功！\r\n");
+
+                
+                // av_image_fill_arrays(rgb_frame->data, rgb_frame->linesize, img_buf, AV_PIX_FMT_BGRA, 800, 480, 1);
+                ret = sws_scale(swsContext,(const uint8_t *const *)video_frame->data,video_frame->linesize,0,video_frame->height,
+                video_rgb_frame->data,video_rgb_frame->linesize);
+                printf("ret == %d\r\n",ret);
+                printf("rgb_frame->linesize[0]: %d\n", video_rgb_frame->linesize[0]); 
+                printf("RGB Data Size: %d\n", video_rgb_frame->linesize[0] * video_rgb_frame->height);
+                lv_img_set_src(guider_ui.screen_img_1,&dec_img);
+                // printf("222222222222222222222222222222222222222222222\r\n");
+                av_frame_unref(video_frame);
+                // printf("3333333333333333333333333333333333333333\r\n");
+                memset(recv_buf,0,sizeof(recv_buf));
+                break;
+            }
+            case XYD_MSG_AUIDO:
+            {
+                printf("sendaudio_msg[96]==%d\r\n",r_buf[96]);
+                printf("sizeof(readmsg) == %ld\r\n",sizeof(readmsg));
+                printf("sendaudio_msg.command==%d\r\n",readmsg.command);
+                printf("sendaudio_msg.data_length==%d\r\n",readmsg.data_length);
+                printf("sendaudio_msg.sum==%d\r\n",readmsg.sum);
+                memset(r_buf,0,sizeof(r_buf));
+                ret = mysock_recv(sockfd,r_buf,readmsg.data_length);
+                printf("音频接收完成!\r\n");
+                av_init_packet(&audiopacket);
+                audiopacket.size = ret;
+                audiopacket.data = r_buf;
+
+                // 发送音频包到解码器
+                ret = avcodec_send_packet(audiocodecContext, &audiopacket);
+                if (ret < 0)
+                {
+                    printf("发送音频包到解码器失败，%d\n",ret);
+                    continue;
+                }
+
+                // 接收解码帧
+                ret = avcodec_receive_frame(audiocodecContext, audioframe);
+                if (ret < 0)
+                {
+                    printf("接收音频帧失败，错误码\n");
+                    continue;
+                }
+                printf("音频解码帧的格式: %d\n", audioframe->format);
+                printf("音频解码帧的通道数: %d\n", audioframe->channels);
+                printf("音频解码帧的样本数: %d\n", audioframe->nb_samples);
+                // 将解码后的音频数据加入 SDL 音频队列
+                int data_size = audioframe->nb_samples * 2;  // 16-bit PCM 每个样本 2 字节
+                ret = SDL_QueueAudio(audioDevice, audioframe->data[0], data_size);
+                if (ret < 0)
+                {
+                    printf("将音频数据加入队列失败\n");
+                }
+                printf("音频数据加入队列成功\r\n");
+                break;
+            }
+           
+        }
+    }
+
+    // 释放资源
+    // av_packet_free(&pkt);
+    // av_frame_free(&frame);
+    // av_frame_free(&rgb_frame);
+    // sws_freeContext(swsContext);
+    // avcodec_free_context(&codecContext);
+    // close(sockfd);
+
+    return NULL;
+}
+void *dec_mpu(void *arg)
+{
+    arg=arg;
+    char mpu_buf[10]={0};
+    char show_mpu_buf[100]={0};
+      // 设置套接字
+    int sockfdmpu = socket(AF_INET, SOCK_STREAM, 0); // 创建套接字
+    if (sockfd < 0) 
+    {
+        perror("无法创建套接字");
+        return (void*)-1;
+    }
+
+    // 连接到服务器
+    struct sockaddr_in server_addrmpu;
+    memset(&server_addrmpu, 0, sizeof(server_addrmpu));
+    server_addrmpu.sin_family = AF_INET;
+    server_addrmpu.sin_port = htons(11223); // 目标端口
+    server_addrmpu.sin_addr.s_addr = inet_addr("192.168.100.25"); // 目标服务器 IP 地址
+
+    if (connect(sockfdmpu, (struct sockaddr *)&server_addrmpu, sizeof(server_addrmpu)) < 0) 
+    {
+        perror("连接失败");
+        close(sockfdmpu);
+        return (void*)-1;
+    }
+    printf("已连接到服务器\n");
+    while (1)
+    {
+        recv(sockfdmpu,mpu_buf,10,0); 
+        if(mpu_buf[0]=='1')
+        {
+            //跌到
+            sprintf(show_mpu_buf,"Personnel fall!!");
+            lv_label_set_text(guider_ui.screen_label_1,show_mpu_buf);
+            memset(show_mpu_buf,0,sizeof(show_mpu_buf));
+        }
+         if(mpu_buf[0]=='0')
+        {
+            //跌到
+            sprintf(show_mpu_buf,"Personnel safety!!");
+            lv_label_set_text(guider_ui.screen_label_1,show_mpu_buf);
+            memset(show_mpu_buf,0,sizeof(show_mpu_buf));
+        }
+        memset(mpu_buf,0,sizeof(mpu_buf));
+
+    }
+    
+
+
+}
 
 void custom_init(lv_ui *ui)
 {
     /* Add your codes here */
+    /**********连接服务器**********/
+    connect_sever();
 
-    
+    /*******初始化音频解码器**********/
+    audio_decode_init();
+
+    /*******初始化视频解码器**********/
+    video_decode_init();
+    /* 在此初始化代码 */
+    pthread_t mpu_pth_id = 10; // 创建线程ID
+    pthread_create(&mpu_pth_id, NULL, dec_mpu, NULL); // 创建新线程，开始解码视频
+
 
 }
 
