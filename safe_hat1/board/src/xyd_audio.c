@@ -1,11 +1,12 @@
 #include "xyd_audio.h"
-
+#include "main.h"
 /*
     初始化  AI AO  ADEC AENC
          音频捕获(AI)->  音频编码 0 ->Muxer->MP4
                         音频编码 1 ->RTSP->推流
           网络数据送到 -> 音频解码  音频输出   
 */
+extern int sockfd;
 extern rtsp_demo_handle g_rtsplive;
 extern rtsp_session_handle g_rtsp_session;
 MPP_CHN_S aenc0_src;
@@ -13,6 +14,7 @@ int count1 = 0;
 FILE *out = NULL;
 FILE *out_ao = NULL;
 MEDIA_BUFFER mb1 = NULL;
+int sendcnt = 0;
 void myaudio_bak(MEDIA_BUFFER mb)
 {
 	uint8_t senddata[1920*1080];

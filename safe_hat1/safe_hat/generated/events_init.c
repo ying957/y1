@@ -10,7 +10,7 @@
 #include "events_init.h"
 #include <stdio.h>
 #include "lvgl.h"
-
+#include "custom.h"
 #if LV_USE_GUIDER_SIMULATOR && LV_USE_FREEMASTER
 #include "freemaster_client.h"
 #endif
@@ -37,14 +37,17 @@ static void screen_imgbtn_2_event_handler (lv_event_t *e)
 	{
         if(button==0)
         {
-            button=1;
+           
             if(video_pth_id == 0)//播放
             {
                 pthread_create(&video_pth_id, NULL, dec_video, NULL); // 创建新线程，开始解码视频
+                printf("开始播放!!\n");
+                
             }
             else{
                 printf("已经有视频在播放\n");
             }
+            button=1;
         }else if(button==1)//暂停
         {
             if(video_pth_id == 0)
@@ -55,6 +58,7 @@ static void screen_imgbtn_2_event_handler (lv_event_t *e)
                 pthread_cancel(video_pth_id);
                 video_pth_id = 0;
             }	
+            button=0;
 
         }
         

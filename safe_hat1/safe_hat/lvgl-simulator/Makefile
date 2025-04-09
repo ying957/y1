@@ -18,7 +18,7 @@ ifeq ($(OS),Windows_NT)
 -include $(SIMULATOR_DIR)/gg_external_data/gg_external_data.mk
 LDFLAGS := -lSDL2 -L$(libfile_path) -ldecoder -lopenh264 -lrlottie -lpthread -lstdc++ -ljansson -lcurl -lm
 else
-LDFLAGS := -lSDL2 -L$(libfile_path) -ldecoder -lopenh264 -lrlottie -lpthread -lstdc++ -lm -ldl
+LDFLAGS := -lSDL2 -L$(libfile_path) -ldecoder -lopenh264 -lrlottie -lpthread -lstdc++ -lm -ldl -lpthread -lavformat -lavcodec -lavutil -lswscale
 endif
 
 BUILD_DIR := build/

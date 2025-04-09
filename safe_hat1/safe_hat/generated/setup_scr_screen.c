@@ -28,10 +28,10 @@ void setup_scr_screen(lv_ui *ui)
 	lv_obj_set_style_bg_color(ui->screen, lv_color_hex(0x6df5fb), LV_PART_MAIN|LV_STATE_DEFAULT);
 	lv_obj_set_style_bg_grad_dir(ui->screen, LV_GRAD_DIR_NONE, LV_PART_MAIN|LV_STATE_DEFAULT);
 
-	//Write codes screen_img_1
+	//Write codes screen_img_1,
 	ui->screen_img_1 = lv_img_create(ui->screen);
 	lv_obj_add_flag(ui->screen_img_1, LV_OBJ_FLAG_CLICKABLE);
-	lv_img_set_src(ui->screen_img_1, &_bck_alpha_480x400);
+	lv_img_set_src(ui->screen_img_1, &_bck_alpha_480x400);//替换图片处
 	lv_img_set_pivot(ui->screen_img_1, 50,50);
 	lv_img_set_angle(ui->screen_img_1, 0);
 	lv_obj_set_pos(ui->screen_img_1, 101, 41);

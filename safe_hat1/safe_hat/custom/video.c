@@ -6,7 +6,7 @@ AVFrame *video_frame = NULL; // 创建AVFrame用于存储解码后的帧
 AVFrame *video_rgb_frame = NULL;
 struct SwsContext *swsContext = NULL;
 
-extern uint8_t img_buf[800*480*4]; // 图像缓冲区，用于存储解码后的图像数据
+extern uint8_t img_buf[480*400*4]; // 图像缓冲区，用于存储解码后的图像数据800*480
 
 void video_decode_init(void)
 {
@@ -54,9 +54,9 @@ void video_decode_init(void)
     video_frame = av_frame_alloc(); // 创建AVFrame用于存储解码后的帧
     video_rgb_frame = av_frame_alloc(); // 创建AVFrame用于存储转换后的BGR格式帧（用于显示）
 
-    av_image_fill_arrays(video_rgb_frame->data, video_rgb_frame->linesize, img_buf, AV_PIX_FMT_BGRA, 800, 480, 1); // 设置BGRframe的数据数组
+    av_image_fill_arrays(video_rgb_frame->data, video_rgb_frame->linesize, img_buf, AV_PIX_FMT_BGRA, 480, 400, 1); // 设置BGRframe的数据数组
     swsContext = sws_getContext( // 创建SWS上下文用于像素格式转换
         videocodecContext->width, videocodecContext->height, videocodecContext->pix_fmt,
-        800, 480, AV_PIX_FMT_BGRA,
+        480, 400, AV_PIX_FMT_BGRA,
         SWS_BICUBIC, NULL, NULL, NULL);
 }

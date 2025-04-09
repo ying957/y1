@@ -33,7 +33,8 @@ int main(int argc,char * argv[])
 #endif
     Check_Net();
     Check_SD_card();
-    tcp ();
+    xyd_sever();
+   // tcp ();
     Init_Rtsp();
     Init_xyd_Video();
     Init_xyd_Audio();

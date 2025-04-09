@@ -53,9 +53,10 @@ typedef struct helmet_message_str
     uint32_t data_length;//数据长度
     uint32_t sum;//和校验
 }HELMET_MSG;
-pthread_t video_pth_id;
 
+pthread_t video_pth_id;
 void custom_init(lv_ui *ui);
+
 void *dec_video(void *arg);
 void connect_sever(void);
 int mysock_recv(int sockfd,void * data,int size);

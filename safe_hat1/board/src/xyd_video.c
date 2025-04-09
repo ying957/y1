@@ -1,11 +1,11 @@
 #include "xyd_video.h"
-
+#include "main.h"
 /*
     VI 
     VENC0
     VENC1   
 */
-
+extern int sockfd;
 MPP_CHN_S venc0_src;
 extern rtsp_demo_handle g_rtsplive;
 extern rtsp_session_handle g_rtsp_session;

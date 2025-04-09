@@ -61,27 +61,16 @@ void *dec_video(void *arg)
         {
             case XYD_MSG_VIDEO:
             {
-                // printf("sockfd===%d\r\n",sockfd);
-                // printf("sizeof(readmsg) == %ld\r\n",sizeof(readmsg));
-                // printf("sendvideo_音频数据加入队列成功msg.command==%d\r\n",readmsg.command);
-                // printf("sendvideo_msg.data_length==%d\r\n",readmsg.data_length);
-                // printf("sendvideo_msg.sum==%d\r\n",readmsg.sum);
+                
                 memset(recv_buf,0,sizeof(recv_buf));
                 int ret =mysock_recv(sockfd,recv_buf,readmsg.data_length);
                 printf("视频接收完成!\r\n");
-                // printf("ret == %d\r\n",ret );
-                // printf("recv_buf【100】 == %d\r\n",recv_buf[100]);
-                // printf("senddata[99]==%d\r\n",recv_buf[99]);
-                // printf("senddata[98]==%d\r\n",recv_buf[98]);
-                // printf("senddata[97]==%d\r\n",recv_buf[97]);
-                // printf("senddata[96]==%d\r\n",recv_buf[96]);
+            
                 av_init_packet(video_packet);
                 video_packet->size = readmsg.data_length;
                 video_packet->data = recv_buf;
                 printf("pkt->size == %d\r\n",video_packet->size);
-                //ret = av_read_frame(formatcontext,pkt);
-                //将视频数据送到解码器队列
-                // printf("senddata[100]==%d\r\n",pkt->data[100]);
+               
                 ret = avcodec_send_packet(videocodecContext,video_packet);
                 
                 ret = avcodec_receive_frame(videocodecContext, video_frame);
@@ -99,7 +88,7 @@ void *dec_video(void *arg)
                 printf("rgb_frame->linesize[0]: %d\n", video_rgb_frame->linesize[0]); 
                 printf("RGB Data Size: %d\n", video_rgb_frame->linesize[0] * video_rgb_frame->height);
                 lv_img_set_src(guider_ui.screen_img_1,&dec_img);
-                // printf("222222222222222222222222222222222222222222222\r\n");
+                printf("222222222222222222222222222222222222222222222\r\n");
                 av_frame_unref(video_frame);
                 // printf("3333333333333333333333333333333333333333\r\n");
                 memset(recv_buf,0,sizeof(recv_buf));
@@ -151,67 +140,9 @@ void *dec_video(void *arg)
         }
     }
 
-    // 释放资源
-    // av_packet_free(&pkt);
-    // av_frame_free(&frame);
-    // av_frame_free(&rgb_frame);
-    // sws_freeContext(swsContext);
-    // avcodec_free_context(&codecContext);
-    // close(sockfd);
-
     return NULL;
 }
-void *dec_mpu(void *arg)
-{
-    arg=arg;
-    char mpu_buf[10]={0};
-    char show_mpu_buf[100]={0};
-      // 设置套接字
-    int sockfdmpu = socket(AF_INET, SOCK_STREAM, 0); // 创建套接字
-    if (sockfd < 0) 
-    {
-        perror("无法创建套接字");
-        return (void*)-1;
-    }
 
-    // 连接到服务器
-    struct sockaddr_in server_addrmpu;
-    memset(&server_addrmpu, 0, sizeof(server_addrmpu));
-    server_addrmpu.sin_family = AF_INET;
-    server_addrmpu.sin_port = htons(11223); // 目标端口
-    server_addrmpu.sin_addr.s_addr = inet_addr("192.168.100.25"); // 目标服务器 IP 地址
-
-    if (connect(sockfdmpu, (struct sockaddr *)&server_addrmpu, sizeof(server_addrmpu)) < 0) 
-    {
-        perror("连接失败");
-        close(sockfdmpu);
-        return (void*)-1;
-    }
-    printf("已连接到服务器\n");
-    while (1)
-    {
-        recv(sockfdmpu,mpu_buf,10,0); 
-        if(mpu_buf[0]=='1')
-        {
-            //跌到
-            sprintf(show_mpu_buf,"Personnel fall!!");
-            lv_label_set_text(guider_ui.screen_label_1,show_mpu_buf);
-            memset(show_mpu_buf,0,sizeof(show_mpu_buf));
-        }
-         if(mpu_buf[0]=='0')
-        {
-            //跌到
-            sprintf(show_mpu_buf,"Personnel safety!!");
-            lv_label_set_text(guider_ui.screen_label_1,show_mpu_buf);
-            memset(show_mpu_buf,0,sizeof(show_mpu_buf));
-        }
-        memset(mpu_buf,0,sizeof(mpu_buf));
-
-    }
-    
-
-
-}
 
 void custom_init(lv_ui *ui)
 {
@@ -224,9 +155,6 @@ void custom_init(lv_ui *ui)
 
     /*******初始化视频解码器**********/
     video_decode_init();
-    /* 在此初始化代码 */
-    pthread_t mpu_pth_id = 10; // 创建线程ID
-    pthread_create(&mpu_pth_id, NULL, dec_mpu, NULL); // 创建新线程，开始解码视频
 
 
 }
