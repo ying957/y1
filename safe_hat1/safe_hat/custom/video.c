@@ -22,8 +22,8 @@ void video_decode_init(void)
     // 填充上下文
     videocodecContext->profile = FF_PROFILE_H264_MAIN;//压缩等级
     videocodecContext->level  = 50;//标识level为 5.0 
-    videocodecContext->height = 1080;
-    videocodecContext->width = 1920;
+    videocodecContext->height = 400;
+    videocodecContext->width = 480;
     //GOP相关的
     videocodecContext->gop_size = 250;//组大小 
     videocodecContext->keyint_min = 30;//最小25帧插入一个 I 帧 
@@ -35,7 +35,7 @@ void video_decode_init(void)
     //设置输出YUV格式 
     videocodecContext->pix_fmt = AV_PIX_FMT_YUV420P;
     //设置码率
-    videocodecContext->bit_rate = 1920*1080*2;//600kbps
+    videocodecContext->bit_rate = 480*400*2;//600kbps
     //设置帧率  
     videocodecContext->time_base = (AVRational){1,30};//帧与帧之间的间隔
     videocodecContext->framerate = (AVRational){30,1};//帧率每秒25帧

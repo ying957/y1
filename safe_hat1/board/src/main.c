@@ -31,11 +31,11 @@ int main(int argc,char * argv[])
 //5：初始化 RTSP服务器
     Init_Rtsp();
 #endif
-    Check_Net();
-    Check_SD_card();
+    // Check_Net();
+    // Check_SD_card();
     xyd_sever();
    // tcp ();
-    Init_Rtsp();
+    // Init_Rtsp();
     Init_xyd_Video();
     Init_xyd_Audio();
     Init_xyd_Muxer();

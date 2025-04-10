@@ -49,6 +49,10 @@ void myaudio_bak(MEDIA_BUFFER mb)
 }
 
 
+
+
+
+
 void Init_xyd_Audio(void)
 {
     
@@ -57,7 +61,7 @@ void Init_xyd_Audio(void)
 	RK_MPI_SYS_Init();
 	//2.设置ai通道的属性
 	AI_CHN_ATTR_S ai_attr;
-	ai_attr.pcAudioNode = "plughw:1,0 ";
+	ai_attr.pcAudioNode = "default";//plughw:1,0 
 	ai_attr.enSampleFormat = RK_SAMPLE_FMT_S16;
 	ai_attr.u32Channels = 1;
 	ai_attr.u32SampleRate = 8000;
@@ -112,6 +116,15 @@ void Init_xyd_Audio(void)
 
 
 }
+
+
+
+
+
+
+
+
+
 //解析语音
 void adec_ao_func(void)
 {

@@ -38,10 +38,10 @@ void audio_decode_init(void)
     {
         char errbuf[AV_ERROR_MAX_STRING_SIZE];
         av_strerror(ret, errbuf, sizeof(errbuf));
-        printf("无法打开音频解码器，错误码\n");
+        printf("无法打开音频解码器，错误码\r\n");
         exit(-1);
     }
-    printf("音频解码器打开成功\n");//////////////////////////////////////////////
+    printf("音频解码器打开成功\r\n");//////////////////////////////////////////////
 
     // 初始化 SDL 音频
     if (SDL_Init(SDL_INIT_AUDIO) < 0)
@@ -64,13 +64,13 @@ void audio_decode_init(void)
     audioDevice = SDL_OpenAudioDevice(NULL, 0, &audioSpec, NULL, 0);
     if (audioDevice == 0)
     {
-    	printf("无法打开音频设备\n");
+    	printf("无法打开音频设备\r\n");
         SDL_Quit();
         avcodec_free_context(&audiocodecContext);
         close(sockfd);
         return ;
     }
-    printf("音频设备打开成功\n");////////////////////////////////////////////////
+    printf("音频设备打开成功\r\n");
 
     SDL_PauseAudioDevice(audioDevice, 0);  // 启动音频播
 

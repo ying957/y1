@@ -15,19 +15,19 @@
 #include "lvgl.h"
 #include "custom.h"
 
-uint8_t recv_buf[1920*1080*2];
+uint8_t recv_buf[480*400*2];
 char r_buf[1200] = {0};
 
 
 char rec_buf[4096];  // 缓存，用于存储从网络读取的数据
-uint8_t img_buf[800*480*4]; // 图像缓冲区，用于存储解码后的图像数据
+uint8_t img_buf[480*400*4]; // 图像缓冲区，用于存储解码后的图像数据
 lv_img_dsc_t dec_img = { // 定义图像描述结构体
   .header.cf = LV_IMG_CF_TRUE_COLOR_ALPHA, // 图像格式为带透明度的真彩色
   .header.always_zero = 0, // 保持为零
   .header.reserved = 0, // 保留字段
-  .header.w = 800, // 图像宽度
-  .header.h = 480, // 图像高度
-  .data_size = 384000 * LV_IMG_PX_SIZE_ALPHA_BYTE, // 图像数据的大小（800*480*4）
+  .header.w = 480, // 图像宽度
+  .header.h = 400, // 图像高度
+  .data_size = 768000 * LV_IMG_PX_SIZE_ALPHA_BYTE, // 图像数据的大小（800*480*4）
   .data = img_buf, // 图像数据缓冲区
 };
 

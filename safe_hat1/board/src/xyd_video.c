@@ -16,7 +16,7 @@ int cnt = 0;
 void myvideo_bak(MEDIA_BUFFER mb)
 {
 
-    uint8_t senddata[1920*1080];
+    uint8_t senddata[480*400];
     uint8_t * data = RK_MPI_MB_GetPtr(mb); //真正的数据
     uint32_t size = RK_MPI_MB_GetSize(mb); //数据的长度
     
@@ -35,7 +35,7 @@ void myvideo_bak(MEDIA_BUFFER mb)
     printf("发送视频频命令长度%d\n",cnt);
 
     //发送真正的数据
-    memset(senddata,0,1920*1080);
+    memset(senddata,0,480 * 400);
     memcpy(senddata,RK_MPI_MB_GetPtr(mb),size);
 
     cnt = mysock_send(sockfd,senddata,size);
@@ -75,8 +75,8 @@ void Init_xyd_Video(void)
 	//设置vi通道的属性，vi通道用于采集
 	VI_CHN_ATTR_S vi_attr;
 	vi_attr.pcVideoNode = "rkispp_scale0";
-	vi_attr.u32Width = 1920;
-	vi_attr.u32Height = 1080;
+	vi_attr.u32Width = 480;
+	vi_attr.u32Height = 400;
 	vi_attr.enPixFmt = IMAGE_TYPE_NV12;
 	vi_attr.enBufType = VI_CHN_BUF_TYPE_MMAP;
 	vi_attr.u32BufCnt = 5;
@@ -89,18 +89,18 @@ void Init_xyd_Video(void)
 	venc_attr.stVencAttr.enType = RK_CODEC_TYPE_H264;
 	venc_attr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
 	venc_attr.stVencAttr.imageType = IMAGE_TYPE_NV12;
-	venc_attr.stVencAttr.u32VirWidth = 1920;
-	venc_attr.stVencAttr.u32VirHeight = 1080;
+	venc_attr.stVencAttr.u32VirWidth = 480;
+	venc_attr.stVencAttr.u32VirHeight = 400;
 	venc_attr.stVencAttr.u32Profile = 77;
-	venc_attr.stVencAttr.u32PicWidth = 1920;
-	venc_attr.stVencAttr.u32PicHeight = 1080;
+	venc_attr.stVencAttr.u32PicWidth = 480;
+	venc_attr.stVencAttr.u32PicHeight = 400;
 	venc_attr.stVencAttr.enRotation = 0;
 	venc_attr.stRcAttr.stH264Cbr.u32Gop = 30;
 	venc_attr.stRcAttr.stH264Cbr.u32SrcFrameRateNum = 30;
 	venc_attr.stRcAttr.stH264Cbr.u32SrcFrameRateDen = 1;
 	venc_attr.stRcAttr.stH264Cbr.fr32DstFrameRateNum = 30;
 	venc_attr.stRcAttr.stH264Cbr.fr32DstFrameRateDen = 1;
-	venc_attr.stRcAttr.stH264Cbr.u32BitRate = 1920*1080;
+	venc_attr.stRcAttr.stH264Cbr.u32BitRate = 480*400;
 	
 	RK_MPI_VENC_CreateChn(0, &venc_attr);
 	RK_MPI_VENC_CreateChn(1, &venc_attr);
